@@ -190,29 +190,29 @@ export default {
 
       this.$bus.$emit('update-check', true);
     },
-    bindGetAllFonts() {
-      ipcRenderer.on('send-all-fonts', (event, arg) => {
-        const fonts = arg.map((line) => {
-          return line.family;
-        });
-
-        fonts.sort();
-        fonts.unshift('Default Initial');
-
-        this.allFonts = [...new Set(fonts)];
-        this.loadingFonts = false;
-      });
-    },
     getAllFonts() {
       if (this.allFonts.length === 0) {
         this.loadingFonts = true;
-        ipcRenderer.send('get-all-fonts');
+
+        require('font-list').getFonts().then((fonts) => {
+          if (!fonts || !fonts.length) {
+            fonts = [];
+          }
+
+          fonts = fonts.map((font) => {
+            return font.replace('"', '').replace('"', '');
+          });
+
+          fonts.unshift('Default Initial');
+
+          this.allFonts = [...new Set(fonts)];
+          this.loadingFonts = false;
+        });
       }
     },
   },
   mounted() {
     this.showSettings();
-    this.bindGetAllFonts();
   },
 };
 </script>
